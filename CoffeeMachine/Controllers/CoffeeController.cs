@@ -15,9 +15,9 @@ namespace CoffeeMachine.Controllers
         private readonly IUtilsService _utilsService;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
-        private readonly ILogger _logger;
+        private readonly ILogger<CoffeeController> _logger;
 
-        public CoffeeController(IWeatherService weatherService,IUtilsService utilsService, IHttpClientFactory httpClientFactory, IConfiguration configuration, ILogger logger)
+        public CoffeeController(IWeatherService weatherService,IUtilsService utilsService, IHttpClientFactory httpClientFactory, IConfiguration configuration, ILogger<CoffeeController> logger)
         {
             _weatherService = weatherService;
             _utilsService = utilsService;
@@ -30,32 +30,43 @@ namespace CoffeeMachine.Controllers
         [Route("brew-coffee")]
         public async Task<IActionResult> GetAsync()
         {
-            _count = _utilsService.CountRequests(HttpContext, RequestCount);
-            if (_utilsService.GetToday() == Constants.FoolsDay)
+            try
             {
-                return new ObjectResult(new EmptyResult())
+                _count = _utilsService.CountRequests(HttpContext, RequestCount);
+                if (_utilsService.GetToday() == Constants.FoolsDay)
                 {
-                    StatusCode = 418,
-                };
-            }
+                    return new ObjectResult(new EmptyResult())
+                    {
+                        StatusCode = 418,
+                    };
+                }
 
-            if (_count % 5 != 0)
-            {
-                var weather = await _weatherService.GetCurrentTemperature(_httpClientFactory, _configuration, _logger);
-                var result = new CoffeeResult()
+                if (_count % 5 != 0)
                 {
-                    message = weather >= 30 ? "Your refreshing iced coffee is ready" : "Your piping hot coffee is ready",
-                    prepared = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:sszzzz")
-                };
-                return Ok(result);
+                    var weather = await _weatherService.GetCurrentTemperature(_httpClientFactory, _configuration);
+                    var result = new CoffeeResult()
+                    {
+                        message = weather >= 30 ? "Your refreshing iced coffee is ready" : "Your piping hot coffee is ready",
+                        prepared = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:sszzzz")
+                    };
+                    return Ok(result);
+                }
+                else
+                {
+                    return new ObjectResult(new EmptyResult())
+                    {
+                        StatusCode = (int)HttpStatusCode.ServiceUnavailable
+                    };
+                }
             }
-            else
+            catch (Exception e)
             {
-                return new ObjectResult(new EmptyResult())
+                if (e is WeatherServiceException)
                 {
-                    StatusCode = (int)HttpStatusCode.ServiceUnavailable
-                };
-            }  
+                    _logger.Log(LogLevel.Error, Constants.WeatherServiceExceptionMessage);
+                }
+                return StatusCode(500);
+            }
         }
       
     }

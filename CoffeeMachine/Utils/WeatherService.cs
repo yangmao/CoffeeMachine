@@ -3,10 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace CoffeeMachine.Utils
 {
-    [ExcludeFromCodeCoverage]
     public class WeatherService: IWeatherService
     {
-        public async Task<double> GetCurrentTemperature(IHttpClientFactory httpClientFactory,IConfiguration configuration, ILogger logger)
+        public async Task<double> GetCurrentTemperature(IHttpClientFactory httpClientFactory,IConfiguration configuration)
         {
             var url =configuration["WeatherApi"] + configuration["AppId"];
             var httpClient = httpClientFactory.CreateClient();
@@ -23,8 +22,7 @@ namespace CoffeeMachine.Utils
             }
             else
             {
-                logger.LogError("Weather Service Unavailible.");
-                return Constants.WeatherServiceUnavailible;
+                throw new WeatherServiceException(Constants.WeatherServiceExceptionMessage);
             }
         }
 }

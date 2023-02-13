@@ -2,6 +2,6 @@
 {
     public interface IWeatherService
     {
-        public Task<double> GetCurrentTemperature(IHttpClientFactory httpClientFactory, IConfiguration configuration, ILogger logger);
+        public Task<double> GetCurrentTemperature(IHttpClientFactory httpClientFactory, IConfiguration configuration);
     }
 }

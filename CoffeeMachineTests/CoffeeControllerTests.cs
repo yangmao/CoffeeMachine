@@ -9,6 +9,7 @@ using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeMachine.Models;
 using Microsoft.Extensions.Logging;
+using CoffeeMachine;
 
 namespace CoffeeMachineTests
 {
@@ -20,21 +21,21 @@ namespace CoffeeMachineTests
         private Mock<IConfiguration> mockConfiguration;
         private Mock<IWeatherService> mockWeatherService;
         private Mock<IUtilsService> mockUtilsService;
-        private Mock<ILogger> mockLogger;
+        private Mock<ILogger<CoffeeController>> mockLogger;
         public CoffeeControllerTests()
         {
             mockHttpClientFactory = new Mock<IHttpClientFactory>();
             mockConfiguration = new Mock<IConfiguration>();
             mockWeatherService = new Mock<IWeatherService>();
             mockUtilsService = new Mock<IUtilsService>();
-            mockLogger = new Mock<ILogger>();
+            mockLogger = new Mock<ILogger<CoffeeController>>();
             controller = new CoffeeController(mockWeatherService.Object,mockUtilsService.Object,mockHttpClientFactory.Object,mockConfiguration.Object,mockLogger.Object);
         }
 
         [Fact]
         public void Given_NotFifthRequest_TemperatureLessThan30_Return_200_WithMessage()
         {
-            mockWeatherService.Setup(x => x.GetCurrentTemperature(mockHttpClientFactory.Object, mockConfiguration.Object, mockLogger.Object)).ReturnsAsync(12);
+            mockWeatherService.Setup(x => x.GetCurrentTemperature(mockHttpClientFactory.Object, mockConfiguration.Object)).ReturnsAsync(12);
             mockUtilsService.Setup(x => x.CountRequests(It.IsAny<HttpContext>(), It.IsAny<string>())).Returns(1);
             var result = controller.GetAsync().Result as OkObjectResult;
             var coffeeresult = result.Value as CoffeeResult;
@@ -46,7 +47,7 @@ namespace CoffeeMachineTests
         [Fact]
         public void Given_NotFifthRequest_TemperatureLessGreaterOrEqual30_Return_200_WithMessage()
         {
-            mockWeatherService.Setup(x => x.GetCurrentTemperature(mockHttpClientFactory.Object, mockConfiguration.Object,mockLogger.Object)).ReturnsAsync(30);
+            mockWeatherService.Setup(x => x.GetCurrentTemperature(mockHttpClientFactory.Object, mockConfiguration.Object)).ReturnsAsync(30);
             mockUtilsService.Setup(x => x.CountRequests(It.IsAny<HttpContext>(), It.IsAny<string>())).Returns(1);
             var result = controller.GetAsync().Result as OkObjectResult;
             var coffeeresult = result.Value as CoffeeResult;
@@ -69,6 +70,14 @@ namespace CoffeeMachineTests
             mockUtilsService.Setup(x => x.GetToday()).Returns("04-01");
             var result = controller.GetAsync().Result;
             result.Should().BeOfType<ObjectResult>().Which.StatusCode.Should().Be(418);
+        }
+
+        [Fact]
+        public void Given_WeatherService_ThrowException_Return_500()
+        {
+            object value = mockWeatherService.Setup(x => x.GetCurrentTemperature(mockHttpClientFactory.Object, mockConfiguration.Object)).Throws<WeatherServiceException>();
+            var result = controller.GetAsync().Result;
+            result.Should().BeOfType<StatusCodeResult>().Which.StatusCode.Should().Be(500);
         }
 
     }

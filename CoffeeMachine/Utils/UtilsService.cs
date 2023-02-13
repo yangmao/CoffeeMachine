@@ -1,5 +1,8 @@
-﻿namespace CoffeeMachine.Utils
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace CoffeeMachine.Utils
 {
+    [ExcludeFromCodeCoverage]
     public class UtilsService : IUtilsService
     {
         public string GetToday()

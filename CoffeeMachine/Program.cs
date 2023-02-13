@@ -1,3 +1,4 @@
+using CoffeeMachine.Controllers;
 using CoffeeMachine.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,9 @@ builder.Services.AddControllers()
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
+var serviceProvider = builder.Services.BuildServiceProvider();
+var logger = serviceProvider.GetService<ILogger<CoffeeController>>();
+builder.Services.AddSingleton(typeof(ILogger), logger);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
