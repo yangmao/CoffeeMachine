@@ -22,6 +22,7 @@ namespace CoffeeMachineTests
         private Mock<IWeatherService> mockWeatherService;
         private Mock<IUtilsService> mockUtilsService;
         private Mock<ILogger<CoffeeController>> mockLogger;
+        private string today;
         public CoffeeControllerTests()
         {
             mockHttpClientFactory = new Mock<IHttpClientFactory>();
@@ -29,6 +30,8 @@ namespace CoffeeMachineTests
             mockWeatherService = new Mock<IWeatherService>();
             mockUtilsService = new Mock<IUtilsService>();
             mockLogger = new Mock<ILogger<CoffeeController>>();
+            today = "2021-02-03T11:56:24+0900";
+            mockUtilsService.Setup(x => x.GetTodayLocalDateTime()).Returns(today);
             controller = new CoffeeController(mockWeatherService.Object,mockUtilsService.Object,mockHttpClientFactory.Object,mockConfiguration.Object,mockLogger.Object);
         }
 
@@ -42,6 +45,7 @@ namespace CoffeeMachineTests
             
             result.Should().BeOfType<OkObjectResult>().Which.StatusCode.Should().Be(200);
             coffeeresult.message.Should().Be("Your piping hot coffee is ready");
+            coffeeresult.prepared.Should().Be(today);
         }
 
         [Fact]
@@ -54,6 +58,7 @@ namespace CoffeeMachineTests
 
             result.Should().BeOfType<OkObjectResult>().Which.StatusCode.Should().Be(200);
             coffeeresult.message.Should().Be("Your refreshing iced coffee is ready");
+            coffeeresult.prepared.Should().Be(today);
         }
 
         [Fact]
@@ -67,7 +72,7 @@ namespace CoffeeMachineTests
         [Fact]
         public void Given_OnFoolsDay_Return_418()
         {
-            mockUtilsService.Setup(x => x.GetToday()).Returns("04-01");
+            mockUtilsService.Setup(x => x.GetTodayDate()).Returns("04-01");
             var result = controller.GetAsync().Result;
             result.Should().BeOfType<ObjectResult>().Which.StatusCode.Should().Be(418);
         }

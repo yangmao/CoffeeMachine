@@ -2,7 +2,8 @@
 {
     public interface IUtilsService
     {
-        string GetToday();
+        string GetTodayDate();
+        string GetTodayLocalDateTime();
         int? CountRequests(HttpContext context, string RequestCount);
     }
 }

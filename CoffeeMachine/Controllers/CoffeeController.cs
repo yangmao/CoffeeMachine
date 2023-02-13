@@ -33,7 +33,7 @@ namespace CoffeeMachine.Controllers
             try
             {
                 _count = _utilsService.CountRequests(HttpContext, RequestCount);
-                if (_utilsService.GetToday() == Constants.FoolsDay)
+                if (_utilsService.GetTodayDate() == Constants.FoolsDay)
                 {
                     return new ObjectResult(new EmptyResult())
                     {
@@ -47,7 +47,7 @@ namespace CoffeeMachine.Controllers
                     var result = new CoffeeResult()
                     {
                         message = weather >= 30 ? "Your refreshing iced coffee is ready" : "Your piping hot coffee is ready",
-                        prepared = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:sszzzz")
+                        prepared = _utilsService.GetTodayLocalDateTime()
                     };
                     return Ok(result);
                 }

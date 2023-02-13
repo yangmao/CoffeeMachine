@@ -5,9 +5,14 @@ namespace CoffeeMachine.Utils
     [ExcludeFromCodeCoverage]
     public class UtilsService : IUtilsService
     {
-        public string GetToday()
+        public string GetTodayDate()
         {
             return DateTime.Now.Date.ToString("MM-dd");
+        }
+
+        public string GetTodayLocalDateTime()
+        {
+            return DateTime.Now.ToString("yyyy-MM-ddTHH:mm:sszzzz");
         }
 
         public int? CountRequests(HttpContext context, string RequestCount)
@@ -24,5 +29,7 @@ namespace CoffeeMachine.Utils
             context.Session.SetInt32(RequestCount, count.Value);
             return count;
         }
+
+       
     }
 }
